@@ -1,4 +1,4 @@
-# [Botkit](http://howdy.ai/botkit) - Best course ever!
+# [Botkit](http://howdy.ai/botkit) - Best course ever! https://travis-ci.org/amritg/botkit.svg?branch=travis
 
 Botkit designed to ease the process of designing and running useful, creative or
 just plain weird bots (and other types of applications) that live inside [Slack](http://slack.com)!
