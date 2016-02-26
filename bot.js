@@ -104,7 +104,29 @@ controller.hears(['record (.*)'],'direct_message,direct_mention,mention',functio
 		}
 	})
 
-    });
+   });
+
+controller.hears(['dota (.*)'],'direct_message,direct_mention,mention',function(bot, message) {
+	var matches = message.text.match(/dota (.*)/i);
+    var playerId = matches[1];
+	var request = require('request');
+	request('http://www.speedrun.com/api_records.php?game=' + name, function (error, response, body) {
+	  try{
+		 
+		var json = JSON.parse(body);
+		var string = body;
+		var n = string.match(/time":"(.*?)"/i);
+		  
+		  
+		bot.reply(message,"Record is: " + n[1] + " Seconds");
+		console.log(body) // Show the HTML for the Google homepage.
+	  }
+		catch(err){
+			bot.reply(message,"Not im my Database");
+		}
+	})
+
+   });
 
 
 controller.hears(['hello','hi'],'direct_message,direct_mention,mention',function(bot, message) {
