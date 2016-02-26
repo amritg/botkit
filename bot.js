@@ -83,6 +83,7 @@ var bot = controller.spawn({
     token: process.env.token
 }).startRTM();
 
+var request = require('request');
 
 controller.hears(['record (.*)'],'direct_message,direct_mention,mention',function(bot, message) {
 	var matches = message.text.match(/record (.*)/i);
@@ -94,10 +95,9 @@ controller.hears(['record (.*)'],'direct_message,direct_mention,mention',functio
 		var json = JSON.parse(body);
 		var string = body;
 		var n = string.match(/time":"(.*?)"/i);
-		  
-		  
+		    
 		bot.reply(message,"Record is: " + n[1] + " Seconds");
-		console.log(body) // Show the HTML for the Google homepage.
+		console.log(body)
 	  }
 		catch(err){
 			bot.reply(message,"Not im my Database");
@@ -109,16 +109,11 @@ controller.hears(['record (.*)'],'direct_message,direct_mention,mention',functio
 controller.hears(['dota (.*)'],'direct_message,direct_mention,mention',function(bot, message) {
 	var matches = message.text.match(/dota (.*)/i);
     var playerId = matches[1];
-	var request = require('request');
-	request('http://www.speedrun.com/api_records.php?game=' + name, function (error, response, body) {
+	
+	request('https://api.steampowered.com/IDOTA2Match_570/GetMatchHistory/V001/?matches_requested=1&account_id=' + playerId+'&key=CED9D559CCCD3B55EBE66DEAAD2983B2', function (error, response, body) {
 	  try{
-		 
 		var json = JSON.parse(body);
-		var string = body;
-		var n = string.match(/time":"(.*?)"/i);
-		  
-		  
-		bot.reply(message,"Record is: " + n[1] + " Seconds");
+		bot.reply(message,"Match Id: " + json.result.matches[0].match_id);
 		console.log(body) // Show the HTML for the Google homepage.
 	  }
 		catch(err){
