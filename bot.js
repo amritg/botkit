@@ -71,6 +71,7 @@ if (!process.env.token) {
     process.exit(1);
 }
 
+
 var MathHelper = require('./botmath.js');
 var Botkit = require('./lib/Botkit.js');
 var os = require('os');
@@ -363,4 +364,27 @@ controller.hears('prime (.*)',['direct_message', 'direct_mention', 'mention'],fu
         return bot.reply(message, "your parameter: " + parameter + " is not Prime number");
     }
 });
+//Twitch integration
+controller.hears('twitch (.*)', ['direct_message', 'direct_mention', 'mention'], function(bot, message) {
 
+   var channel = message.match[1];
+   var url = "https://api.twitch.tv/kraken/streams/" + channel;
+
+   request({
+       url: url,
+       json: true
+   }, function(error, response, body) {
+
+       if (!error && response.statusCode === 200) {
+           console.log(body); // Print the json response
+           if (body["stream"] == null) {
+               //THEY ARE OFFLINE DO WHATEVER HERE
+               return bot.reply(message, channel + ' is OFFLINE NOW. Sadface. Kappa \n Check again later.');
+           } else {
+               //THEY ARE ONLINE DO WHATEVER HERE
+               return bot.reply(message, channel + ' is LIVE NOW. PogChamp \n He is playing: ' + body.stream.game + '\n' + body.stream.preview.large);
+           }
+       }
+   });
+
+});
