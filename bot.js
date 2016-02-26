@@ -84,22 +84,93 @@ var bot = controller.spawn({
 }).startRTM();
 
 var request = require('request');
+
+var herotable = []
+request('https://api.steampowered.com/IEconDOTA2_570/GetHeroes/v0001/?key=CED9D559CCCD3B55EBE66DEAAD2983B2&language=en_us', function (error, response, body) {
+        try{
+            var json = JSON.parse(body);
+            for(i=0;i<json.result.heroes.length;i++){
+                var hobject = json.result.heroes[i];
+                herotable[json.result.heroes[i].id] = json.result.heroes[i].localized_name
+            }
+        }
+        catch(err){
+        }
+});
+
 controller.hears(['dota (.*)'],'direct_message,direct_mention,mention',function(bot, message) {
 	 var matches = message.text.match(/dota (.*)/i);
      var playerId = matches[1];
-       
+     var match_id;
      request('https://api.steampowered.com/IDOTA2Match_570/GetMatchHistory/V001/?matches_requested=1&account_id=' + playerId+'&key=CED9D559CCCD3B55EBE66DEAAD2983B2', function (error, response, body) {
 		 try{
 			 var json = JSON.parse(body);
-			 bot.reply(message,"Match Id: " + json.result.matches[0].match_id);
-             console.log(body) // Show the HTML for the Google homepage.
-          }
-         catch(err){
-			bot.reply(message,"Not im my Database");
+             match_id=json.result.matches[0].match_id;
+			 bot.reply(message,"Match Id: " + match_id);
+
+             request('https://api.steampowered.com/IDOTA2Match_570/GetMatchDetails/V001/?match_id='+match_id+'&key=CED9D559CCCD3B55EBE66DEAAD2983B2', function (error, response, body) {
+        try{
+            var json = JSON.parse(body);
+            var playerindex;
+            for(i=0;i<json.result.players.length;i++){
+                if (playerId==json.result.players[i].account_id){
+                    playerindex=i
+                }
+            }
+            var heroid = json.result.players[playerindex].hero_id;
+            var hero = herotable[heroid];
+            var k = json.result.players[playerindex].kills;
+            var d = json.result.players[playerindex].deaths;
+            var a = json.result.players[playerindex].assists;
+            var lh = json.result.players[playerindex].last_hits;
+
+            var slot = json.result.players[playerindex].player_slot;
+            var team;
+            if(slot > 100){
+                team = 'dire';
+            }
+            else{
+                team = 'radiant';
+            }
+            console.log(team);
+            var win = json.result.radiant_win;
+            var wongame;
+            if(win=='true'){
+                if(team=='radiant'){
+                    wongame = true;
+                }else{
+                    wongame=false;
+                }
+            }else{
+                if(team=='dire'){
+                    wongame=true;
+                }else{
+                    wongame=false;
+                }
+            }
+
+            bot.reply(message,'Here is the info for your last dota2 game.');
+            bot.reply(message,'hero: '+hero);
+            bot.reply(message,'Kills/deaths/assists: '+k+' / '+d+' / '+a);
+            bot.reply(message,'Last hits: '+lh);
+            if(wongame){
+                    bot.reply(message,'You won the game.');
+            }else{
+                bot.reply(message,'You lost the game.');
+            }
         }
- 
+        catch(err){
+            bot.reply(message, err);
+        }
+    });
+
+    }
+    catch(err){
+		bot.reply(message,"Not im my Database");
+    }
  	});
- });
+    
+});
 
 controller.hears(['record (.*)'],'direct_message,direct_mention,mention',function(bot, message) {
 	var matches = message.text.match(/record (.*)/i);
